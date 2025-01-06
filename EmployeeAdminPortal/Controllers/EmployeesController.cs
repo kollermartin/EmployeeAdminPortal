@@ -1,6 +1,7 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.Models;
 using EmployeeAdminPortal.Models.Entities;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeAdminPortal.Controllers;
@@ -9,10 +10,17 @@ namespace EmployeeAdminPortal.Controllers;
 [Route("api/[controller]")]
 public class EmployeesController : ControllerBase
 {
+    //TODO FluentValidation
+    //TODO mapovat na dto přes static metodu
+    //TODO Nahradit IactionRestult za Result
+    //TODO Použít recordType místo classy pro DTO
+    //TODO Async / await
+    //TODO nahradit Find
+    //https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=fluent-api
     private readonly ApplicationDbContext _dbContext;
     public EmployeesController(ApplicationDbContext dbContext)
     {
-        this._dbContext = dbContext;
+        _dbContext = dbContext;
     }
     
     [HttpGet]
@@ -25,15 +33,15 @@ public class EmployeesController : ControllerBase
 
     [HttpGet]
     [Route("{id:guid}")]
-    public IActionResult GetEmployeeById(Guid id)
+    public Results<NotFound, Ok<Employee>> GetEmployeeById(Guid id)
     {
         var employee = _dbContext.Employees.Find(id);
         if (employee is null)
         {
-            return NotFound();
+            return TypedResults.NotFound();
         }
         
-        return Ok(employee);
+        return TypedResults.Ok(employee);
     }
 
     [HttpPost]
