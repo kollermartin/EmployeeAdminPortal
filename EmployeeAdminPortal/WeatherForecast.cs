@@ -1,4 +1,5 @@
 namespace EmployeeAdminPortal;
+//TODO kde definovat top level namespace
 
 public class WeatherForecast
 {
