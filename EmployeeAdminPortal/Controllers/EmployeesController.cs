@@ -13,8 +13,6 @@ public class EmployeesController : ControllerBase
 {
     //TODO FluentValidation
     //TODO mapovat na dto přes static metodu
-    //TODO Nahradit IactionRestult za Result
-    //TODO Použít recordType místo classy pro DTO
     //https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=fluent-api
     private readonly ApplicationDbContext _dbContext;
     public EmployeesController(ApplicationDbContext dbContext)

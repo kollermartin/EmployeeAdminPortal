@@ -1,6 +1,6 @@
 ﻿namespace EmployeeAdminPortal.Models;
 
-public class AddEmployeeDto
+public record AddEmployeeDto
 {
     public required string Name { get; set; }
     public required string Phone { get; set; }
