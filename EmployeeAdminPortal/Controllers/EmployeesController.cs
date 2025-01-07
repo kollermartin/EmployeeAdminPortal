@@ -3,6 +3,7 @@ using EmployeeAdminPortal.Models;
 using EmployeeAdminPortal.Models.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeAdminPortal.Controllers;
 
@@ -14,8 +15,6 @@ public class EmployeesController : ControllerBase
     //TODO mapovat na dto přes static metodu
     //TODO Nahradit IactionRestult za Result
     //TODO Použít recordType místo classy pro DTO
-    //TODO Async / await
-    //TODO nahradit Find
     //https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=fluent-api
     private readonly ApplicationDbContext _dbContext;
     public EmployeesController(ApplicationDbContext dbContext)
@@ -24,18 +23,18 @@ public class EmployeesController : ControllerBase
     }
     
     [HttpGet]
-    public IActionResult GetAllEmployees()
+    public async Task<IResult> GetAllEmployees()
     {
-        var allEmployees = _dbContext.Employees.ToList();
+        var allEmployees = await _dbContext.Employees.ToListAsync();
         
-        return Ok(allEmployees);
+        return Results.Ok(allEmployees);
     }
 
     [HttpGet]
     [Route("{id:guid}")]
-    public Results<NotFound, Ok<Employee>> GetEmployeeById(Guid id)
+    public async Task<Results<NotFound, Ok<Employee>>> GetEmployeeById(Guid id)
     {
-        var employee = _dbContext.Employees.Find(id);
+        var employee = await _dbContext.Employees.FirstOrDefaultAsync(em => em.Id == id);
         if (employee is null)
         {
             return TypedResults.NotFound();
@@ -45,7 +44,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult AddEmployee(AddEmployeeDto addEmployeeDto)
+    public async Task<IResult> AddEmployee(AddEmployeeDto addEmployeeDto)
     {
         var employeeEntity = new Employee()
         {
@@ -55,21 +54,21 @@ public class EmployeesController : ControllerBase
             Salary = addEmployeeDto.Salary,
         };
         
-        _dbContext.Employees.Add(employeeEntity);
-        _dbContext.SaveChanges();
+        await _dbContext.Employees.AddAsync(employeeEntity);
+        await _dbContext.SaveChangesAsync();
 
-        return Ok(employeeEntity);
+        return Results.Ok(employeeEntity);
     }
 
     [HttpPut]
     [Route("{id:guid}")]
-    public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
+    public async Task<Results<NotFound, Ok<Employee>>> UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
     {
-        var employee = _dbContext.Employees.Find(id);
+        var employee = await _dbContext.Employees.FirstOrDefaultAsync(em => em.Id == id);
 
         if (employee is null)
         {
-            return NotFound();
+            return TypedResults.NotFound();
         }
 
         employee.Name = updateEmployeeDto.Name ?? employee.Name;
@@ -77,25 +76,25 @@ public class EmployeesController : ControllerBase
         employee.Email = updateEmployeeDto.Email ?? employee.Email;
         employee.Salary = updateEmployeeDto.Salary ?? employee.Salary;
 
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
         
-        return Ok(employee);
+        return TypedResults.Ok(employee);
     }
 
     [HttpDelete]
     [Route("{id:guid}")]
-    public IActionResult DeleteEmployee(Guid id)
+    public async Task<Results<NotFound, Ok<Employee>>> DeleteEmployee(Guid id)
     {
-        var employee = _dbContext.Employees.Find(id);
+        var employee = await _dbContext.Employees.FirstOrDefaultAsync(em => em.Id == id);
 
         if (employee is null)
         {
-            return NotFound();
+            return TypedResults.NotFound();
         }
         
         _dbContext.Employees.Remove(employee);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
         
-        return Ok(employee);
+        return TypedResults.Ok(employee);
     }
 }
