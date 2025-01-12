@@ -1,4 +1,4 @@
-using EmployeeAdminPortal.Models;
+using EmployeeAdminPortal.Models.Dto;
 using EmployeeAdminPortal.Models.Entities;
 
 namespace EmployeeAdminPortal.Mappers;

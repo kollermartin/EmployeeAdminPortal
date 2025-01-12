@@ -1,7 +1,8 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.Mappers;
-using EmployeeAdminPortal.Models;
+using EmployeeAdminPortal.Models.Dto;
 using EmployeeAdminPortal.Models.Entities;
+using EmployeeAdminPortal.Models.Validators;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace EmployeeAdminPortal.Controllers;
 [Route("api/[controller]")]
 public class EmployeesController : ControllerBase
 {
-    //TODO FluentValidation
+    //TODO logging
     //https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=fluent-api
     private readonly ApplicationDbContext _dbContext;
     public EmployeesController(ApplicationDbContext dbContext)
@@ -42,8 +43,16 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IResult> AddEmployee(AddEmployeeDto addEmployeeDto)
+    public async Task<Results<BadRequest, ValidationProblem, Ok<EmployeeDto>>> AddEmployee(AddEmployeeDto addEmployeeDto)
     {
+        var validator = new AddEmployeeValidator();
+        var validationResult = await validator.ValidateAsync(addEmployeeDto);
+        
+        if (!validationResult.IsValid)
+        {
+            return TypedResults.ValidationProblem(validationResult.ToDictionary());
+        }
+        
         var employeeEntity = new Employee()
         {
             Name = addEmployeeDto.Name,
@@ -57,13 +66,22 @@ public class EmployeesController : ControllerBase
 
         var employeeDto = EmployeeMapper.ConvertToDto(employeeEntity);
 
-        return Results.Ok(employeeDto);
+        return TypedResults.Ok(employeeDto);
     }
 
     [HttpPut]
     [Route("{id:guid}")]
-    public async Task<Results<NotFound, Ok<EmployeeDto>>> UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
+    public async Task<Results<NotFound, ValidationProblem, Ok<EmployeeDto>>> UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
     {
+        var validator = new UpdateEmployeeValidator();
+        var validationResult = await validator.ValidateAsync(updateEmployeeDto);
+        
+        // Divná error message když je salary jako string
+        if (!validationResult.IsValid)
+        {
+            return TypedResults.ValidationProblem(validationResult.ToDictionary());
+        }
+        
         var employee = await _dbContext.Employees.FirstOrDefaultAsync(em => em.Id == id);
 
         if (employee is null)
