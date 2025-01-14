@@ -6,10 +6,29 @@ namespace EmployeeAdminPortal.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): DbContext(options)
 {
     public DbSet<Employee> Employees { get; set; }
+    
+    // protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // {
+    //     // modelBuilder.Entity<Employee>().Property(e => e.CreatedAt).HasDefaultValueSql("getdate()");
+    //     // modelBuilder.Entity<Employee>().Property(e => e.UpdatedAt).HasDefaultValueSql("getdate()").ValueGeneratedOnAddOrUpdate();
+    // }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        //TODO https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=fluent-api
-        base.OnModelCreating(modelBuilder);
+        foreach (var entry in ChangeTracker.Entries<Employee>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedAt = DateTime.UtcNow;
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    break;
+            }
+        }
+        
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

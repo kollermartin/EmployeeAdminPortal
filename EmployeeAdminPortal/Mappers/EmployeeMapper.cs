@@ -13,7 +13,9 @@ public static class EmployeeMapper
             Name = employee.Name,
             Phone = employee.Phone,
             Email = employee.Email,
-            Salary = employee.Salary
+            Salary = employee.Salary,
+            CreatedAt = employee.CreatedAt,
+            UpdatedAt = employee.UpdatedAt,
         };
     }
 }
