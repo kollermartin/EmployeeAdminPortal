@@ -11,9 +11,11 @@ using Microsoft.EntityFrameworkCore;
 namespace EmployeeAdminPortal.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/employees")]
 public class EmployeesController : ControllerBase
 {
+    //global error handling
+    //https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-9.0
     //https://learn.microsoft.com/en-us/ef/core/modeling/keys?tabs=fluent-api
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<EmployeesController> _logger;
@@ -24,13 +26,14 @@ public class EmployeesController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IResult> GetAllEmployees()
+    public async Task<Ok<List<Employee>>> GetAllEmployees()
     {
         _logger.LogInformation(EmployeesControllerLogEvents.ListEmployees,"Fetching all employees from the database");
+        // namapovat do DTO přes Select
         var allEmployees = await _dbContext.Employees.ToListAsync();
         _logger.LogInformation(EmployeesControllerLogEvents.ListEmployees,"Fetched all employees {Count} from the database", allEmployees.Count);
         
-        return Results.Ok(allEmployees);
+        return TypedResults.Ok(allEmployees);
     }
 
     [HttpGet]
@@ -38,6 +41,7 @@ public class EmployeesController : ControllerBase
     public async Task<Results<NotFound, Ok<EmployeeDto>>> GetEmployeeById(Guid id)
     {
         _logger.LogInformation(EmployeesControllerLogEvents.GetEmployee,"Fetching employee with id {Id} from the database", id);
+        // namapovat do DTO přes Select
         var employee = await _dbContext.Employees.FirstOrDefaultAsync(em => em.Id == id);
         if (employee is null)
         {
@@ -50,9 +54,11 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<Results<BadRequest, ValidationProblem, Ok<EmployeeDto>>> AddEmployee(AddEmployeeDto addEmployeeDto)
+    public async Task<Results<ValidationProblem, Ok<EmployeeDto>>> AddEmployee(AddEmployeeDto addEmployeeDto)
     {
         _logger.LogInformation(EmployeesControllerLogEvents.AddEmployee,"Adding employee to the database");
+        // injectnout validator
+        // https://docs.fluentvalidation.net/en/latest/di.html
         var validator = new AddEmployeeValidator();
         var validationResult = await validator.ValidateAsync(addEmployeeDto);
         
