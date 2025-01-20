@@ -1,6 +1,6 @@
-﻿namespace EmployeeAdminPortal.Models.Entities;
+namespace EmployeeAdminPortal.Models.Dto;
 
-public class Employee
+public record EmployeeDto
 {
     public Guid Id { get; set; }
     public required string Name { get; set; }

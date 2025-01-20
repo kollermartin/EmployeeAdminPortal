@@ -1,9 +1,9 @@
-﻿namespace EmployeeAdminPortal.Models;
+﻿namespace EmployeeAdminPortal.Models.Dto;
 
-public class AddEmployeeDto
+public record AddEmployeeDto
 {
     public required string Name { get; set; }
     public required string Phone { get; set; }
-    public string? Email { get; set; }
+    public required string Email { get; set; }
     public decimal Salary { get; set; }
 }
