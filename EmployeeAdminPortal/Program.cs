@@ -1,9 +1,14 @@
 using EmployeeAdminPortal.Data;
+using EmployeeAdminPortal.Models.Dto;
+using EmployeeAdminPortal.Models.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IValidator<AddEmployeeDto>, AddEmployeeValidator>();
+builder.Services.AddScoped<IValidator<UpdateEmployeeDto>, UpdateEmployeeValidator>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
