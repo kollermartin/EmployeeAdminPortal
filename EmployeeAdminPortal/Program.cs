@@ -1,4 +1,5 @@
 using EmployeeAdminPortal.Data;
+using EmployeeAdminPortal.ExceptionHandlers;
 using EmployeeAdminPortal.Models.Dto;
 using EmployeeAdminPortal.Models.Validators;
 using FluentValidation;
@@ -6,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IValidator<AddEmployeeDto>, AddEmployeeValidator>();
 builder.Services.AddScoped<IValidator<UpdateEmployeeDto>, UpdateEmployeeValidator>();
@@ -27,6 +30,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(); // Enables Swagger middleware
     app.UseSwaggerUI(); // Enables Swagger UI middleware
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
