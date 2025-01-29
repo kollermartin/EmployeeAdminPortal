@@ -46,7 +46,7 @@ public class EmployeesController : ControllerBase
     public async Task<Results<NotFound, Ok<EmployeeDto>>> GetEmployeeById(Guid id)
     {
         _logger.LogInformation(EmployeesControllerLogEvents.GetEmployee,"Fetching employee with id {Id} from the database", id);
-        var employee = await _dbContext.Employees.Select(e => EmployeeMapper.ConvertToDto(e)).FirstOrDefaultAsync(e => e.Id == id);
+        var employee = await _dbContext.Employees.Where(e => e.Id == id).Select(e => EmployeeMapper.ConvertToDto(e)).FirstOrDefaultAsync();
         if (employee is null)
         {
             _logger.LogWarning(EmployeesControllerLogEvents.GetEmployee,"Employee with id {Id} not found in the database", id);
